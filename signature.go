@@ -20,20 +20,7 @@ var (
 	byteOrder binary.ByteOrder = binary.BigEndian
 )
 
-type SignatureInterface interface {
-	//Verify() error
-
-	Bytes() []byte
-	Id() string
-	MajorVersion() uint16
-	MinorVersion() uint16
-	ExeSize() int64
-	ZipSize() int64
-	String() string
-	SetExeSize(exeSize int64)
-	SetZipSize(zipSize int64)
-}
-
+// signature
 type signature struct {
 	id           string
 	majorVersion uint16
@@ -51,15 +38,48 @@ func NewSignature() *signature {
 	}
 }
 
-func RestoreSignature(bytes []byte) (*signature, error) {
+// Restore signature from bytes.
+func RestoreSignature(data []byte) (*signature, error) {
 	// Check size.
-	if len(bytes) != SIGNATURE_BYTE_SIZE {
+	if len(data) != SIGNATURE_BYTE_SIZE {
 		return nil, errors.New("Invalid signature size.")
 	}
+	// Convert bytes to buffer.
+	buf := bytes.NewBuffer(data)
 	// Initialize signature.
 	s := &signature{}
-	// Restore id.
-	//idBytes :=
+	// Restore ID.
+	var idBytes []byte = make([]byte, ID_BYTE_SIZE, ID_BYTE_SIZE)
+	n, err := buf.Read(idBytes)
+	if n != ID_BYTE_SIZE || err != nil {
+		return nil, err
+	}
+	idLen := bytes.IndexByte(idBytes, 0)
+	if idLen < 0 {
+		idLen = ID_BYTE_SIZE
+	}
+	s.id = string(idBytes[:idLen])
+	// Restore versions.
+	err = binary.Read(buf, byteOrder, &s.majorVersion)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Read(buf, byteOrder, &s.minorVersion)
+	if err != nil {
+		return nil, err
+	}
+	// Restore sizes.
+	err = binary.Read(buf, byteOrder, &s.exeSize)
+	if s.exeSize <= 0 || err != nil {
+		return nil, err
+	}
+	err = binary.Read(buf, byteOrder, &s.zipSize)
+	if s.zipSize <= 0 || err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("signature %s\n", s.String())
+	//idBytes := 1
 	return s, nil
 }
 
@@ -86,39 +106,39 @@ func (s *signature) Dump() ([]byte, error) {
 	// Initialize buffer and byte count.
 	buf := new(bytes.Buffer)
 	byteCount := 0
-	// Copy ID.
+	// Write ID.
 	err := binary.Write(buf, byteOrder, s.idBytes())
 	if err != nil {
-		return []byte{}, errors.New("Failed to write id.")
+		return []byte{}, err
 	}
 	byteCount += binary.Size(s.idBytes())
-	// Copy version informations.
+	// Write versions.
 	err = binary.Write(buf, byteOrder, s.majorVersion)
 	if err != nil {
-		return []byte{}, errors.New("Failed to write major version.")
+		return []byte{}, err
 	}
 	byteCount += binary.Size(s.majorVersion)
 	err = binary.Write(buf, byteOrder, s.minorVersion)
 	if err != nil {
-		return []byte{}, errors.New("Failed to write major version.")
+		return []byte{}, err
 	}
 	byteCount += binary.Size(s.minorVersion)
-	// Copy size informations.
+	// Write sizes.
 	err = binary.Write(buf, byteOrder, s.exeSize)
 	if err != nil {
-		return []byte{}, errors.New("Failed to write exe size.")
+		return []byte{}, err
 	}
 	byteCount += binary.Size(s.exeSize)
 	err = binary.Write(buf, byteOrder, s.zipSize)
 	if err != nil {
-		return []byte{}, errors.New("Failed to write zip size.")
+		return []byte{}, err
 	}
 	byteCount += binary.Size(s.zipSize)
 	// Fill with blank bytes.
 	for i := byteCount; i < SIGNATURE_BYTE_SIZE; i++ {
 		err := binary.Write(buf, byteOrder, byte(0))
 		if err != nil {
-			return []byte{}, errors.New("Failed to write blank bytes.")
+			return []byte{}, err
 		}
 	}
 	return buf.Bytes(), nil
