@@ -77,9 +77,6 @@ func RestoreSignature(data []byte) (*signature, error) {
 	if s.zipSize <= 0 || err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("signature %s\n", s.String())
-	//idBytes := 1
 	return s, nil
 }
 
