@@ -40,7 +40,7 @@ func TestDumpRestore(t *testing.T) {
 			orig.zipSize, copy.zipSize)
 	}
 	// Compare strings.
-	if orig.String() == copy.String() {
+	if orig.String() != copy.String() {
 		t.Errorf("Compare strings: expected [%v] got [%v]",
 			orig.String(), copy.String())
 	}
