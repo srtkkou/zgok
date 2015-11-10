@@ -5,34 +5,45 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"errors"
 )
 
-const (
-	APP   = "zgok"
-	MAJOR = 0
-	MINOR = 0
-	REV   = 1
-)
+type Files interface {
+	ReadFile(path string) ([]byte, error)
+}
 
-type zgok struct {
+type zgokFiles struct {
 	isZgokFormat bool
 	signature    *signature
 	fileMap      map[string][]byte
 }
 
-func Initialize() *zgok {
-	z := &zgok{}
+func Initialize() Files {
+	z := &zgokFiles{}
 	z.isZgokFormat = false
 	// Get signature from the executable file itself.
 	selfPath, _ := filepath.Abs(os.Args[0])
-	signature, _ := parseSignature(selfPath)
+	fmt.Println("before signature init")
+	signature, err := parseSignature(selfPath)
+	if err != nil {
+		fmt.Println(err)
+	}
 	z.signature = signature
+	if z.signature != nil {
+		fmt.Println(z.signature.String())
+	}
+
 	// Setup file map.
 	z.fileMap = make(map[string][]byte)
-	if signature != nil {
-		parseZip(signature, selfPath)
+	z.parseZip(selfPath)
+
+	// Show file map.
+	fmt.Println("--FileMap--")
+	for path, _ := range z.fileMap {
+		fmt.Printf("key=%s\n", path)
 	}
 	return z
 }
@@ -64,7 +75,11 @@ func parseSignature(path string) (*signature, error) {
 	return signature, nil
 }
 
-func parseZip(signature *signature, path string) error {
+func (z *zgokFiles) parseZip(path string) error {
+	// Do nothing if signature is nil.
+	if z.signature == nil {
+		return nil
+	}
 	// Open the file.
 	file, err := os.Open(path)
 	if err != nil {
@@ -72,8 +87,8 @@ func parseZip(signature *signature, path string) error {
 	}
 	defer file.Close()
 	// Get zip section.
-	exeSize := signature.exeSize
-	zipSize := signature.zipSize
+	exeSize := z.signature.exeSize
+	zipSize := z.signature.zipSize
 	zipSectionReader := io.NewSectionReader(file, exeSize, zipSize)
 	zipReader, _ := zip.NewReader(zipSectionReader, zipSize)
 	var rc io.ReadCloser
@@ -85,18 +100,34 @@ func parseZip(signature *signature, path string) error {
 		buf := new(bytes.Buffer)
 		rc, err = f.Open()
 		if err != nil {
-			fmt.Errorf("%v", err)
+			fmt.Printf("%v", err)
 		}
 		_, err = io.Copy(buf, rc)
 		if err != nil {
-			fmt.Errorf("%v", err)
+			fmt.Printf("%v", err)
 		}
+		// Store into file map.
+		z.fileMap[f.Name] = buf.Bytes()
 		fmt.Println(len(buf.Bytes()))
 		rc.Close()
 	}
 	return nil
 }
 
-func (z *zgok) ReadFile(path string) ([]byte, error) {
-	return []byte{}, nil
+func (z *zgokFiles) ReadFile(path string) ([]byte, error) {
+	// Read from file system if signature is blank.
+	fmt.Printf("path:%s\n", path)
+	if z.signature == nil {
+		fmt.Println("READ FROM FILE SYSTEM.")
+		return ioutil.ReadFile(path)
+	}
+	// Read file from zip.
+	zipPath := filepath.Join(APP, path)
+	fmt.Printf("READ FROM ZIP.%s\n", zipPath)
+	bytes, exists := z.fileMap[zipPath]
+	if !exists {
+		return []byte{}, errors.New("File does not exist.")
+	}
+	fmt.Printf("content=%s\n", string(bytes))
+	return bytes, nil
 }

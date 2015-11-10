@@ -17,6 +17,7 @@ type Zipper struct {
 	basePath string
 }
 
+// Create new zipper.
 func NewZipper() *Zipper {
 	z := &Zipper{}
 	z.isClosed = false
@@ -26,6 +27,7 @@ func NewZipper() *Zipper {
 	return z
 }
 
+// Add files in the path to zip.
 func (z *Zipper) Add(path string) error {
 	// Check if zip is closed or not.
 	if z.isClosed {
@@ -48,6 +50,7 @@ func (z *Zipper) Add(path string) error {
 	return nil
 }
 
+// Close zip writer.
 func (z *Zipper) Close() error {
 	err := z.writer.Close()
 	if err != nil {
@@ -57,6 +60,7 @@ func (z *Zipper) Close() error {
 	return nil
 }
 
+// Get bytes of zip.
 func (z *Zipper) Bytes() ([]byte, error) {
 	if !z.isClosed {
 		return []byte{}, errors.New("ZIP is not closed.")
@@ -64,6 +68,7 @@ func (z *Zipper) Bytes() ([]byte, error) {
 	return z.buffer.Bytes(), nil
 }
 
+// Add file to zip.
 func (z *Zipper) addFile(filePath string) error {
 	// Get file information.
 	fileInfo, err := os.Stat(filePath)
@@ -92,19 +97,21 @@ func (z *Zipper) addFile(filePath string) error {
 	return nil
 }
 
+// Add directory to zip.
 func (z *Zipper) addDir(dirPath string) error {
-	// List files in directory.
-	pattern := filepath.Join(dirPath, "**", "*")
-	filePaths, err := filepath.Glob(pattern)
-	if err != nil {
-		return err
-	}
-	// Add all files to zip.
-	for _, filePath := range filePaths {
-		err = z.addFile(filePath)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	// Walk through all the files in the directory.
+	err := filepath.Walk(dirPath,
+		func(path string, info os.FileInfo, err error) error {
+			// Do nothing on directory.
+			if info.IsDir(){
+				return nil
+			}
+			// Add file to zip.
+			err = z.addFile(path)
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+	return err
 }

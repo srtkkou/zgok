@@ -57,29 +57,51 @@ func RestoreSignature(data []byte) (*signature, error) {
 	if err != nil {
 		return nil, err
 	}
+	if app != APP {
+		return nil, errors.New("Invalid signature.")
+	}
 	s.app = app
-	// Restore versions.
-	err = binary.Read(buf, byteOrder, &s.major)
+	// Restore major version.
+	var major uint16
+	err = binary.Read(buf, byteOrder, &major)
 	if err != nil {
 		return nil, err
 	}
-	err = binary.Read(buf, byteOrder, &s.minor)
+	s.major = major
+	// Restore minor version.
+	var minor uint16
+	err = binary.Read(buf, byteOrder, &minor)
 	if err != nil {
 		return nil, err
 	}
-	err = binary.Read(buf, byteOrder, &s.rev)
+	s.minor = minor
+	// Restore revision.
+	var rev uint16
+	err = binary.Read(buf, byteOrder, &rev)
 	if err != nil {
 		return nil, err
 	}
-	// Restore sizes.
-	err = binary.Read(buf, byteOrder, &s.exeSize)
-	if s.exeSize <= 0 || err != nil {
+	s.rev = rev
+	// Restore exe size.
+	var exeSize int64
+	err = binary.Read(buf, byteOrder, &exeSize)
+	if err != nil {
 		return nil, err
 	}
-	err = binary.Read(buf, byteOrder, &s.zipSize)
-	if s.zipSize <= 0 || err != nil {
+	if exeSize <= 0 {
+		return nil, errors.New("Invalid signature.")
+	}
+	s.exeSize = exeSize
+	// Restore zip size.
+	var zipSize int64
+	err = binary.Read(buf, byteOrder, &zipSize)
+	if err != nil {
 		return nil, err
 	}
+	if zipSize <= 0 {
+		return nil, errors.New("Invalid signature.")
+	}
+	s.zipSize = zipSize
 	return s, nil
 }
 

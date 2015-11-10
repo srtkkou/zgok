@@ -3,9 +3,7 @@ package zgok
 import (
 	"io/ioutil"
 	"os"
-	//"bytes"
 	"testing"
-	//"archive/zip"
 )
 
 func TestZipper(t *testing.T) {
@@ -20,7 +18,6 @@ func TestZipper(t *testing.T) {
 	}
 	zipper.Close()
 	data, _ := zipper.Bytes()
-	//t.Errorf("%v", data[0:10])
 	err = ioutil.WriteFile("zip_path.zip", data, os.ModePerm)
 	if err != nil {
 		t.Errorf("%v", err)
