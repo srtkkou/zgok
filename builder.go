@@ -1,9 +1,9 @@
 package zgok
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
-	"errors"
 )
 
 // Builder interface.
@@ -16,9 +16,9 @@ type Builder interface {
 
 // Zgok builder
 type zgokBuilder struct {
-	exePath string
+	exePath  string
 	zipPaths []string
-	outPath string
+	outPath  string
 	exeBytes *[]byte
 	zipBytes *[]byte
 	sigBytes *[]byte

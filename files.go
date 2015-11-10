@@ -3,12 +3,12 @@ package zgok
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"errors"
 )
 
 type Files interface {

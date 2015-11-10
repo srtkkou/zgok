@@ -103,7 +103,7 @@ func (z *Zipper) addDir(dirPath string) error {
 	err := filepath.Walk(dirPath,
 		func(path string, info os.FileInfo, err error) error {
 			// Do nothing on directory.
-			if info.IsDir(){
+			if info.IsDir() {
 				return nil
 			}
 			// Add file to zip.

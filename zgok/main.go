@@ -1,11 +1,11 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
-	"os"
 	"github.com/srtkkou/zgok"
-	"errors"
+	"os"
 )
 
 const (
@@ -28,11 +28,11 @@ func (s *strSlice) Set(v string) error {
 
 // Arguments.
 type Arguments struct {
-	isDebug    bool
+	isDebug   bool
 	isVerbose bool
-	exePath    string
-	zipPaths strSlice
-	outPath    string
+	exePath   string
+	zipPaths  strSlice
+	outPath   string
 }
 
 // Verify arguments.
