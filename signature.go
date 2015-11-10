@@ -8,10 +8,7 @@ import (
 )
 
 const (
-	ID                  = "zgok"
-	ID_BYTE_SIZE        = 8
-	MAJOR_VERSION       = 0
-	MINOR_VERSION       = 1
+	APP_BYTE_SIZE       = 8
 	SIGNATURE_BYTE_SIZE = 64
 )
 
@@ -22,19 +19,21 @@ var (
 
 // signature
 type signature struct {
-	id           string
-	majorVersion uint16
-	minorVersion uint16
-	exeSize      int64
-	zipSize      int64
+	app     string
+	major   uint16
+	minor   uint16
+	rev     uint16
+	exeSize int64
+	zipSize int64
 }
 
 // Initialize signature.
 func NewSignature() *signature {
 	return &signature{
-		id:           ID,
-		majorVersion: MAJOR_VERSION,
-		minorVersion: MINOR_VERSION,
+		app:   APP,
+		major: MAJOR,
+		minor: MINOR,
+		rev:   REV,
 	}
 }
 
@@ -48,23 +47,27 @@ func RestoreSignature(data []byte) (*signature, error) {
 	buf := bytes.NewBuffer(data)
 	// Initialize signature.
 	s := &signature{}
-	// Restore ID.
-	var idBytes []byte = make([]byte, ID_BYTE_SIZE, ID_BYTE_SIZE)
-	n, err := buf.Read(idBytes)
-	if n != ID_BYTE_SIZE || err != nil {
-		return nil, err
-	}
-	idLen := bytes.IndexByte(idBytes, 0)
-	if idLen < 0 {
-		idLen = ID_BYTE_SIZE
-	}
-	s.id = string(idBytes[:idLen])
-	// Restore versions.
-	err = binary.Read(buf, byteOrder, &s.majorVersion)
+	// Restore app name.
+	var appBytes []byte = make([]byte, APP_BYTE_SIZE, APP_BYTE_SIZE)
+	_, err := buf.Read(appBytes)
 	if err != nil {
 		return nil, err
 	}
-	err = binary.Read(buf, byteOrder, &s.minorVersion)
+	app, err := restoreAppString(appBytes)
+	if err != nil {
+		return nil, err
+	}
+	s.app = app
+	// Restore versions.
+	err = binary.Read(buf, byteOrder, &s.major)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Read(buf, byteOrder, &s.minor)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Read(buf, byteOrder, &s.rev)
 	if err != nil {
 		return nil, err
 	}
@@ -80,21 +83,40 @@ func RestoreSignature(data []byte) (*signature, error) {
 	return s, nil
 }
 
+// Restore app string from bytes.
+func restoreAppString(appBytes []byte) (string, error) {
+	// Check byte size.
+	if len(appBytes) != APP_BYTE_SIZE {
+		return "", errors.New("Invalid app byte size.")
+	}
+	// Get string length.
+	appLen := bytes.IndexByte(appBytes, 0)
+	if appLen < 0 || APP_BYTE_SIZE < appLen {
+		appLen = APP_BYTE_SIZE
+	}
+	app := string(appBytes[:appLen])
+	return app, nil
+}
+
+// Set exe file byte size.
 func (sig *signature) SetExeSize(exeSize int64) {
 	sig.exeSize = exeSize
 }
 
+// Set zip file byte size.
 func (sig *signature) SetZipSize(zipSize int64) {
 	sig.zipSize = zipSize
 }
 
+// Calculate the total byte size.
 func (s *signature) TotalSize() int64 {
 	return s.exeSize + s.zipSize + SIGNATURE_BYTE_SIZE
 }
 
+// Convert to string.
 func (s *signature) String() string {
-	return fmt.Sprintf("%s-%d.%d(exe:%d,zip:%d,total:%d)",
-		s.id, s.majorVersion, s.minorVersion,
+	return fmt.Sprintf("%s-%d.%d.%d(exe:%d,zip:%d,total:%d)",
+		s.app, s.major, s.minor, s.rev,
 		s.exeSize, s.zipSize, s.TotalSize())
 }
 
@@ -103,23 +125,29 @@ func (s *signature) Dump() ([]byte, error) {
 	// Initialize buffer and byte count.
 	buf := new(bytes.Buffer)
 	byteCount := 0
-	// Write ID.
-	err := binary.Write(buf, byteOrder, s.idBytes())
+	// Write app name.
+	appBytes := s.appBytes()
+	err := binary.Write(buf, byteOrder, appBytes)
 	if err != nil {
 		return []byte{}, err
 	}
-	byteCount += binary.Size(s.idBytes())
+	byteCount += binary.Size(appBytes)
 	// Write versions.
-	err = binary.Write(buf, byteOrder, s.majorVersion)
+	err = binary.Write(buf, byteOrder, s.major)
 	if err != nil {
 		return []byte{}, err
 	}
-	byteCount += binary.Size(s.majorVersion)
-	err = binary.Write(buf, byteOrder, s.minorVersion)
+	byteCount += binary.Size(s.major)
+	err = binary.Write(buf, byteOrder, s.minor)
 	if err != nil {
 		return []byte{}, err
 	}
-	byteCount += binary.Size(s.minorVersion)
+	byteCount += binary.Size(s.minor)
+	err = binary.Write(buf, byteOrder, s.rev)
+	if err != nil {
+		return []byte{}, err
+	}
+	byteCount += binary.Size(s.rev)
 	// Write sizes.
 	err = binary.Write(buf, byteOrder, s.exeSize)
 	if err != nil {
@@ -141,13 +169,13 @@ func (s *signature) Dump() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Byte array of the id string.
-func (s *signature) idBytes() [ID_BYTE_SIZE]byte {
-	var result [ID_BYTE_SIZE]byte
-	idBytes := []byte(s.id)
+// Byte array of the app string.
+func (s *signature) appBytes() [APP_BYTE_SIZE]byte {
+	var result [APP_BYTE_SIZE]byte
+	appBytes := []byte(s.app)
 	for i, _ := range result {
-		if i < len(idBytes) {
-			result[i] = idBytes[i]
+		if i < len(appBytes) {
+			result[i] = appBytes[i]
 		}
 	}
 	return result

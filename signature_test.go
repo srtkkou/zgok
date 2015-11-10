@@ -20,16 +20,20 @@ func TestDumpRestore(t *testing.T) {
 		t.Errorf("RestoreSignature() failed: %v", err)
 	}
 	// Compare data.
-	if orig.id != copy.id {
-		t.Errorf("Compare id: expected [%v] got [%v]", orig.id, copy.id)
+	if orig.app != copy.app {
+		t.Errorf("Compare app: expected [%v] got [%v]", orig.app, copy.app)
 	}
-	if orig.majorVersion != copy.majorVersion {
+	if orig.major != copy.major {
 		t.Errorf("Compare major version: expected [%v] got [%v]",
-			orig.majorVersion, copy.majorVersion)
+			orig.major, copy.major)
 	}
-	if orig.minorVersion != copy.minorVersion {
+	if orig.minor != copy.minor {
 		t.Errorf("Compare minor version: expected [%v] got [%v]",
-			orig.minorVersion, copy.minorVersion)
+			orig.minor, copy.minor)
+	}
+	if orig.rev != copy.rev {
+		t.Errorf("Compare revision: expected [%v] got [%v]",
+			orig.rev, copy.rev)
 	}
 	if orig.exeSize != copy.exeSize {
 		t.Errorf("Compare exe size: expected [%v] got [%v]",
