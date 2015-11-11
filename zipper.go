@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -93,7 +92,6 @@ func (z *Zipper) addFile(filePath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(path)
 	return nil
 }
 
