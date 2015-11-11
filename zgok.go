@@ -2,8 +2,10 @@ package zgok
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"fmt"
 )
 
 const (
@@ -34,8 +36,29 @@ func NewFileSystem() FileSystem {
 }
 
 // Restore file system.
-func RestoreFileSystem() FileSystem {
-	return nil
+func RestoreFileSystem() (FileSystem, error) {
+	// Get bytes of exe file.
+	exeBytes, err := ioutil.ReadFile(os.Args[0])
+	if err != nil {
+		return nil, err
+	}
+	// Restore signature.
+	sigOffset := len(exeBytes) - SIGNATURE_BYTE_SIZE
+	sigBytes := exeBytes[sigOffset:]
+	signature, err := RestoreSignature(sigBytes)
+	if err != nil {
+		return nil, err
+	}
+	// Unzip zip section.
+	fmt.Println(signature.String())
+	zipOffset := signature.exeSize
+	zipBytes := exeBytes[zipOffset:sigOffset]
+	unzipper := NewUnzipper(&zipBytes)
+	zfs, err := unzipper.Unzip()
+	if err != nil {
+		return nil, err
+	}
+	return zfs, nil
 }
 
 // Add file to file system.
