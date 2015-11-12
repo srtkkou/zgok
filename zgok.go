@@ -3,6 +3,7 @@ package zgok
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -17,6 +18,11 @@ const (
 	MINOR = 0
 	REV   = 1
 )
+
+// Get version string.
+func Version() string {
+	return fmt.Sprintf("%s-%d.%d.%d", APP, MAJOR, MINOR, REV)
+}
 
 // File system interface.
 // Implements [net/http.FileSystem]

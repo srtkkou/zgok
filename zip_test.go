@@ -1,10 +1,7 @@
 package zgok
 
 import (
-	//"io/ioutil"
-	//"os"
 	"testing"
-	//"fmt"
 )
 
 func TestZipAndUnzip(t *testing.T) {

@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	ERROR_CODE = 255
+	NORMAL_CODE = 0
+	ERROR_CODE  = 255
 )
 
 // Multiple arguments.
@@ -28,15 +29,53 @@ func (s *strSlice) Set(v string) error {
 
 // Arguments.
 type Arguments struct {
-	isDebug   bool
-	isVerbose bool
+	isHelp    bool
+	isVersion bool
 	exePath   string
 	zipPaths  strSlice
 	outPath   string
 }
 
+// Set usage.
+func (a *Arguments) setUsage() {
+	flag.Usage = func() {
+		fmt.Println(zgok.Version())
+		fmt.Println()
+		fmt.Printf("Usage: %s [-h] [-v]\n", zgok.APP)
+		fmt.Printf("  -e exePath -z zipPath [-o outPath]\n")
+		fmt.Println()
+		fmt.Println("Options:")
+		fmt.Println("  -v : Print version.")
+		fmt.Println("  -h : Print this help message.")
+		fmt.Println("  -e string : [REQUIRED] Executable file's path.")
+		fmt.Println("  -z string : [REQUIRED] Target paths to add to zip.")
+		fmt.Println("  -o string : Output file's path.")
+		fmt.Println()
+		fmt.Println("Note:")
+		fmt.Println("  You can set multiple [-z] arguments.")
+	}
+}
+
+// Set flags.
+func (a *Arguments) setFlags() {
+	flag.BoolVar(&a.isHelp, "h", false, "Print usage.")
+	flag.BoolVar(&a.isVersion, "v", false, "Print this help message.")
+	flag.StringVar(&a.exePath, "e", "", "Executable file's path. *REQUIRED")
+	flag.Var(&a.zipPaths, "z", "ZIP target paths. *REQUIRED")
+	flag.StringVar(&a.outPath, "o", "out", "Output file's path.")
+}
+
 // Verify arguments.
 func (a *Arguments) verify() error {
+	// Return if [-h] is specified.
+	if a.isHelp {
+		return nil
+	}
+	// Return if [--version] is specified.
+	if a.isVersion {
+		return nil
+	}
+	// Check [-e] and [-z].
 	if a.exePath == "" {
 		return errors.New("-e option is required.")
 	}
@@ -47,21 +86,10 @@ func (a *Arguments) verify() error {
 }
 
 func main() {
-	// Customize usage.
-	flag.Usage = func() {
-		fmt.Printf("%s version %d.%d.%d\n",
-			zgok.APP, zgok.MAJOR, zgok.MINOR, zgok.REV)
-		fmt.Printf("Usage: %s -e exePath -z zipPath -o outPath\n",
-			zgok.APP)
-		flag.PrintDefaults()
-	}
 	// Parse flags
 	args := &Arguments{}
-	flag.BoolVar(&args.isDebug, "debug", false, "Debug flag.")
-	flag.BoolVar(&args.isVerbose, "verbose", false, "Verbose flag.")
-	flag.StringVar(&args.exePath, "e", "", "Executable file's path. *REQUIRED")
-	flag.Var(&args.zipPaths, "z", "ZIP target paths. *REQUIRED")
-	flag.StringVar(&args.outPath, "o", "out", "Output file's path.")
+	args.setUsage()
+	args.setFlags()
 	flag.Parse()
 	// Verify arguments.
 	err := args.verify()
@@ -70,6 +98,16 @@ func main() {
 		fmt.Println()
 		flag.Usage()
 		os.Exit(ERROR_CODE)
+	}
+	// Show usage for [-h]
+	if args.isHelp {
+		flag.Usage()
+		os.Exit(NORMAL_CODE)
+	}
+	// Show version for [--version].
+	if args.isVersion {
+		fmt.Println(zgok.Version())
+		os.Exit(NORMAL_CODE)
 	}
 	// Initialize builder.
 	builder := zgok.NewZgokBuilder()

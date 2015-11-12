@@ -158,9 +158,8 @@ func (s *zgokSignature) TotalSize() int64 {
 
 // Convert to string.
 func (s *zgokSignature) String() string {
-	return fmt.Sprintf("%s-%d.%d.%d(exe:%d,zip:%d,total:%d)",
-		s.app, s.major, s.minor, s.rev,
-		s.exeSize, s.zipSize, s.TotalSize())
+	return fmt.Sprintf("%s(exe:%d,zip:%d,total:%d)",
+		Version(), s.exeSize, s.zipSize, s.TotalSize())
 }
 
 // Dump signature to bytes.
