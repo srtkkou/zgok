@@ -17,8 +17,19 @@ var (
 	byteOrder binary.ByteOrder = binary.BigEndian
 )
 
+// Signature interface.
+type Signature interface {
+	ExeSize() int64
+	SetExeSize(exeSize int64)
+	ZipSize() int64
+	SetZipSize(zipSize int64)
+	TotalSize() int64
+	String() string
+	Dump() ([]byte, error)
+}
+
 // signature
-type signature struct {
+type zgokSignature struct {
 	app     string
 	major   uint16
 	minor   uint16
@@ -28,8 +39,8 @@ type signature struct {
 }
 
 // Initialize signature.
-func NewSignature() *signature {
-	return &signature{
+func NewSignature() Signature {
+	return &zgokSignature{
 		app:   APP,
 		major: MAJOR,
 		minor: MINOR,
@@ -38,7 +49,7 @@ func NewSignature() *signature {
 }
 
 // Restore signature from bytes.
-func RestoreSignature(data []byte) (*signature, error) {
+func RestoreSignature(data []byte) (Signature, error) {
 	// Check size.
 	if len(data) != SIGNATURE_BYTE_SIZE {
 		return nil, errors.New("Invalid signature size.")
@@ -46,7 +57,7 @@ func RestoreSignature(data []byte) (*signature, error) {
 	// Convert bytes to buffer.
 	buf := bytes.NewBuffer(data)
 	// Initialize signature.
-	s := &signature{}
+	s := &zgokSignature{}
 	// Restore app name.
 	var appBytes []byte = make([]byte, APP_BYTE_SIZE, APP_BYTE_SIZE)
 	_, err := buf.Read(appBytes)
@@ -120,30 +131,40 @@ func restoreAppString(appBytes []byte) (string, error) {
 	return app, nil
 }
 
+// Get exe file byte size.
+func (sig *zgokSignature) ExeSize() int64 {
+	return sig.exeSize
+}
+
 // Set exe file byte size.
-func (sig *signature) SetExeSize(exeSize int64) {
+func (sig *zgokSignature) SetExeSize(exeSize int64) {
 	sig.exeSize = exeSize
 }
 
+// Get zip file byte size.
+func (sig *zgokSignature) ZipSize() int64 {
+	return sig.zipSize
+}
+
 // Set zip file byte size.
-func (sig *signature) SetZipSize(zipSize int64) {
+func (sig *zgokSignature) SetZipSize(zipSize int64) {
 	sig.zipSize = zipSize
 }
 
 // Calculate the total byte size.
-func (s *signature) TotalSize() int64 {
+func (s *zgokSignature) TotalSize() int64 {
 	return s.exeSize + s.zipSize + SIGNATURE_BYTE_SIZE
 }
 
 // Convert to string.
-func (s *signature) String() string {
+func (s *zgokSignature) String() string {
 	return fmt.Sprintf("%s-%d.%d.%d(exe:%d,zip:%d,total:%d)",
 		s.app, s.major, s.minor, s.rev,
 		s.exeSize, s.zipSize, s.TotalSize())
 }
 
 // Dump signature to bytes.
-func (s *signature) Dump() ([]byte, error) {
+func (s *zgokSignature) Dump() ([]byte, error) {
 	// Initialize buffer and byte count.
 	buf := new(bytes.Buffer)
 	byteCount := 0
@@ -192,7 +213,7 @@ func (s *signature) Dump() ([]byte, error) {
 }
 
 // Byte array of the app string.
-func (s *signature) appBytes() [APP_BYTE_SIZE]byte {
+func (s *zgokSignature) appBytes() [APP_BYTE_SIZE]byte {
 	var result [APP_BYTE_SIZE]byte
 	appBytes := []byte(s.app)
 	for i, _ := range result {
