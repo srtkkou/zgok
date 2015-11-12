@@ -31,6 +31,7 @@ type FileSystem interface {
 	GetFile(path string) (File, error)
 	ReadFile(path string) ([]byte, error)
 	ReadFileString(path string) (string, error)
+	Paths() []string
 	SubFileSystem(rootPath string) (FileSystem, error)
 	Signature() Signature
 	SetSignature(signature Signature)
@@ -115,6 +116,17 @@ func (zfs *zgokFileSystem) ReadFileString(path string) (string, error) {
 	}
 	str := string(bytes)
 	return str, nil
+}
+
+// Get all the paths stored in the file system.
+func (zfs *zgokFileSystem) Paths() []string {
+	i := 0
+	paths := make([]string, len(zfs.fileMap))
+	for key := range zfs.fileMap {
+		paths[i] = key
+		i++
+	}
+	return paths
 }
 
 // Get a sub file system.
