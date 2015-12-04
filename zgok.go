@@ -36,8 +36,7 @@ type FileSystem interface {
 	Signature() Signature
 	SetSignature(signature Signature)
 	String() string
-	// Implements [net/http.FileSystem.Open]
-	Open(name string) (http.File, error)
+	Open(name string) (http.File, error) // Implements [net/http.FileSystem.Open]
 }
 
 // Zgok file system.
@@ -120,11 +119,13 @@ func (zfs *zgokFileSystem) ReadFileString(path string) (string, error) {
 
 // Get all the paths stored in the file system.
 func (zfs *zgokFileSystem) Paths() []string {
-	i := 0
-	paths := make([]string, len(zfs.fileMap))
+	paths := []string{}
+	prefix := zfs.rootPath + "/"
 	for key := range zfs.fileMap {
-		paths[i] = key
-		i++
+		if strings.HasPrefix(key, prefix) {
+			relPath := strings.TrimPrefix(key, prefix)
+			paths = append(paths, relPath)
+		}
 	}
 	return paths
 }
@@ -193,16 +194,11 @@ type File interface {
 	SetBytes(content []byte)
 	Bytes() []byte
 	SetNewReader()
-	// Implements [net/http.File.Close]
-	Close() error
-	// Implements [net/http.File.Read]
-	Read(p []byte) (int, error)
-	// Implements [net/http.File.Readdir]
-	Readdir(count int) ([]os.FileInfo, error)
-	// Implements [net/http.File.Seek]
-	Seek(offset int64, whence int) (int64, error)
-	// Implements [net/http.File.Stat]
-	Stat() (os.FileInfo, error)
+	Close() error                                 // Implements [net/http.File.Close]
+	Read(p []byte) (int, error)                   // Implements [net/http.File.Read]
+	Readdir(count int) ([]os.FileInfo, error)     // Implements [net/http.File.Readdir]
+	Seek(offset int64, whence int) (int64, error) // Implements [net/http.File.Seek]
+	Stat() (os.FileInfo, error)                   // Implements [net/http.File.Stat]
 }
 
 // Zgok file.
