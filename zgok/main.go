@@ -90,9 +90,9 @@ func runBuildCommand(args []string) {
 	}
 	// Parse flags
 	var (
-		exePath string
+		exePath  string
 		zipPaths strSlice
-		outPath string
+		outPath  string
 	)
 	fs := flag.NewFlagSet("build", flag.ExitOnError)
 	fs.StringVar(&exePath, "e", "", "Executable file's path.")
