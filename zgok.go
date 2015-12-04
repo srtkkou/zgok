@@ -57,9 +57,9 @@ func NewFileSystem() FileSystem {
 }
 
 // Restore file system.
-func RestoreFileSystem() (FileSystem, error) {
+func RestoreFileSystem(path string) (FileSystem, error) {
 	// Get bytes of exe file.
-	exeBytes, err := ioutil.ReadFile(os.Args[0])
+	exeBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
