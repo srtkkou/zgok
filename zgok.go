@@ -220,7 +220,7 @@ func NewZgokFile() File {
 
 // Set file path.
 func (zf *zgokFile) SetPath(path string) {
-	zf.path = path
+	zf.path = strings.Replace(path, `\`, "/", -1)
 }
 
 // Get file path.
