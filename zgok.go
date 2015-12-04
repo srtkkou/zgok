@@ -85,7 +85,7 @@ func RestoreFileSystem(path string) (FileSystem, error) {
 
 // Add file to file system.
 func (zfs *zgokFileSystem) AddFile(file File) {
-	key := filepath.ToSlash(file.FileInfo().Name())
+	key := filepath.ToSlash(file.Path())
 	zfs.fileMap[key] = file
 }
 
@@ -191,11 +191,13 @@ func (zfs *zgokFileSystem) Open(name string) (http.File, error) {
 
 // File interface.
 type File interface {
-	SetFileInfo(fileInfo os.FileInfo)
-	FileInfo() os.FileInfo
-	SetBytes(content []byte)
-	Bytes() []byte
-	SetNewReader()
+	SetPath(path string)                          // Set file path.
+	Path() string                                 // Get file path.
+	SetFileInfo(fileInfo os.FileInfo)             // Set file info.
+	FileInfo() os.FileInfo                        // Get file info.
+	SetBytes(content []byte)                      // Set content bytes.
+	Bytes() []byte                                // Get content bytes.
+	SetNewReader()                                // Set a new reader.
 	Close() error                                 // Implements [net/http.File.Close]
 	Read(p []byte) (int, error)                   // Implements [net/http.File.Read]
 	Readdir(count int) ([]os.FileInfo, error)     // Implements [net/http.File.Readdir]
@@ -205,6 +207,7 @@ type File interface {
 
 // Zgok file.
 type zgokFile struct {
+	path     string
 	fileInfo os.FileInfo
 	content  []byte
 	reader   *bytes.Reader
@@ -215,22 +218,32 @@ func NewZgokFile() File {
 	return &zgokFile{}
 }
 
-// Set file info to file.
+// Set file path.
+func (zf *zgokFile) SetPath(path string) {
+	zf.path = path
+}
+
+// Get file path.
+func (zf *zgokFile) Path() string {
+	return zf.path
+}
+
+// Set file info.
 func (zf *zgokFile) SetFileInfo(fileInfo os.FileInfo) {
 	zf.fileInfo = fileInfo
 }
 
-// Get file info of file.
+// Get file info.
 func (zf *zgokFile) FileInfo() os.FileInfo {
 	return zf.fileInfo
 }
 
-// Set bytes to file.
+// Set content bytes.
 func (zf *zgokFile) SetBytes(content []byte) {
 	zf.content = content
 }
 
-// Get bytes from file.
+// Get content bytes.
 func (zf *zgokFile) Bytes() []byte {
 	return zf.content
 }

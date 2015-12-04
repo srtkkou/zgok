@@ -43,7 +43,10 @@ func (u *Unzipper) Unzip() (FileSystem, error) {
 	for _, file := range zipReader.File {
 		// Initialize zgok file.
 		zgokFile := NewZgokFile()
-		// Get file info.
+		// Set file path.
+		path := file.FileHeader.Name
+		zgokFile.SetPath(path)
+		// Set file info.
 		fileInfo := file.FileHeader.FileInfo()
 		zgokFile.SetFileInfo(fileInfo)
 		// Open file.

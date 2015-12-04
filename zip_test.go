@@ -29,6 +29,19 @@ func TestZipAndUnzip(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to unzip files: %v", err)
 	}
+	// Verify paths.
+	zfsPaths := zfs.Paths()
+	expectedPaths := []string{
+		"testdata/dir/bar",
+		"testdata/dir/baz",
+		"testdata/foo",
+	}
+	for i, expected := range expectedPaths {
+		zfsPath := zfsPaths[i]
+		if zfsPath != expected {
+			t.Errorf("Paths(): expected [%s] got [%s]", expected, zfsPath)
+		}
+	}
 	// Verify foo file.
 	fooStr, err := zfs.ReadFileString("testdata/foo")
 	if err != nil {
