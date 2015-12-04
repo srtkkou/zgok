@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 )
@@ -127,6 +128,7 @@ func (zfs *zgokFileSystem) Paths() []string {
 			paths = append(paths, relPath)
 		}
 	}
+	sort.Strings(paths)
 	return paths
 }
 
