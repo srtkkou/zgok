@@ -12,11 +12,6 @@ const (
 	SIGNATURE_BYTE_SIZE = 64 // Byte size of the signature.
 )
 
-var (
-	// byte order of the signature
-	byteOrder binary.ByteOrder = binary.BigEndian
-)
-
 // Signature interface.
 type Signature interface {
 	ExeSize() int64
@@ -30,21 +25,23 @@ type Signature interface {
 
 // signature
 type zgokSignature struct {
-	app     string // App name.
-	major   uint16 // Major version.
-	minor   uint16 // Minor version.
-	rev     uint16 // Revision.
-	exeSize int64  // Executable file size.
-	zipSize int64  // Zip file part size.
+	app       string           // App name.
+	major     uint16           // Major version.
+	minor     uint16           // Minor version.
+	rev       uint16           // Revision.
+	exeSize   int64            // Executable file size.
+	zipSize   int64            // Zip file part size.
+	byteOrder binary.ByteOrder // Byte order.
 }
 
 // Initialize signature.
 func NewSignature() Signature {
 	return &zgokSignature{
-		app:   APP,
-		major: MAJOR,
-		minor: MINOR,
-		rev:   REV,
+		app:       APP,
+		major:     MAJOR,
+		minor:     MINOR,
+		rev:       REV,
+		byteOrder: binary.BigEndian,
 	}
 }
 
@@ -57,7 +54,9 @@ func RestoreSignature(data []byte) (Signature, error) {
 	// Convert bytes to buffer.
 	buf := bytes.NewBuffer(data)
 	// Initialize signature.
-	s := &zgokSignature{}
+	s := &zgokSignature{
+		byteOrder: binary.BigEndian,
+	}
 	// Restore app name.
 	var appBytes []byte = make([]byte, APP_BYTE_SIZE, APP_BYTE_SIZE)
 	_, err := buf.Read(appBytes)
@@ -74,28 +73,28 @@ func RestoreSignature(data []byte) (Signature, error) {
 	s.app = app
 	// Restore major version.
 	var major uint16
-	err = binary.Read(buf, byteOrder, &major)
+	err = binary.Read(buf, s.byteOrder, &major)
 	if err != nil {
 		return nil, err
 	}
 	s.major = major
 	// Restore minor version.
 	var minor uint16
-	err = binary.Read(buf, byteOrder, &minor)
+	err = binary.Read(buf, s.byteOrder, &minor)
 	if err != nil {
 		return nil, err
 	}
 	s.minor = minor
 	// Restore revision.
 	var rev uint16
-	err = binary.Read(buf, byteOrder, &rev)
+	err = binary.Read(buf, s.byteOrder, &rev)
 	if err != nil {
 		return nil, err
 	}
 	s.rev = rev
 	// Restore exe size.
 	var exeSize int64
-	err = binary.Read(buf, byteOrder, &exeSize)
+	err = binary.Read(buf, s.byteOrder, &exeSize)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +104,7 @@ func RestoreSignature(data []byte) (Signature, error) {
 	s.exeSize = exeSize
 	// Restore zip size.
 	var zipSize int64
-	err = binary.Read(buf, byteOrder, &zipSize)
+	err = binary.Read(buf, s.byteOrder, &zipSize)
 	if err != nil {
 		return nil, err
 	}
@@ -169,41 +168,41 @@ func (s *zgokSignature) Dump() ([]byte, error) {
 	byteCount := 0
 	// Write app name.
 	appBytes := s.appBytes()
-	err := binary.Write(buf, byteOrder, appBytes)
+	err := binary.Write(buf, s.byteOrder, appBytes)
 	if err != nil {
 		return []byte{}, err
 	}
 	byteCount += binary.Size(appBytes)
 	// Write versions.
-	err = binary.Write(buf, byteOrder, s.major)
+	err = binary.Write(buf, s.byteOrder, s.major)
 	if err != nil {
 		return []byte{}, err
 	}
 	byteCount += binary.Size(s.major)
-	err = binary.Write(buf, byteOrder, s.minor)
+	err = binary.Write(buf, s.byteOrder, s.minor)
 	if err != nil {
 		return []byte{}, err
 	}
 	byteCount += binary.Size(s.minor)
-	err = binary.Write(buf, byteOrder, s.rev)
+	err = binary.Write(buf, s.byteOrder, s.rev)
 	if err != nil {
 		return []byte{}, err
 	}
 	byteCount += binary.Size(s.rev)
 	// Write sizes.
-	err = binary.Write(buf, byteOrder, s.exeSize)
+	err = binary.Write(buf, s.byteOrder, s.exeSize)
 	if err != nil {
 		return []byte{}, err
 	}
 	byteCount += binary.Size(s.exeSize)
-	err = binary.Write(buf, byteOrder, s.zipSize)
+	err = binary.Write(buf, s.byteOrder, s.zipSize)
 	if err != nil {
 		return []byte{}, err
 	}
 	byteCount += binary.Size(s.zipSize)
 	// Fill with blank bytes.
 	for i := byteCount; i < SIGNATURE_BYTE_SIZE; i++ {
-		err := binary.Write(buf, byteOrder, byte(0))
+		err := binary.Write(buf, s.byteOrder, byte(0))
 		if err != nil {
 			return []byte{}, err
 		}

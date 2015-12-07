@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestDumpRestore(t *testing.T) {
+func TestSignatureDumpRestore(t *testing.T) {
 	// Create signature for testing.
 	orig := NewSignature()
 	orig.SetExeSize(12345678909876)

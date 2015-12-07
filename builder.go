@@ -1,7 +1,7 @@
 package zgok
 
 import (
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -92,6 +92,10 @@ func (b *zgokBuilder) setExeBytes() error {
 
 // Set zip file bytes.
 func (b *zgokBuilder) setZipBytes() error {
+	// Check if zip paths are empty.
+	if len(b.zipPaths) == 0 {
+		return fmt.Errorf("Zip paths not set.")
+	}
 	var err error
 	// Create new zipper.
 	zipper := NewZipper()
@@ -121,10 +125,10 @@ func (b *zgokBuilder) setZipBytes() error {
 func (b *zgokBuilder) setSignatureBytes() error {
 	// Check if exeBytes and zipBytes are set.
 	if len(*b.exeBytes) <= 0 {
-		return errors.New("Exe bytes not set.")
+		return fmt.Errorf("Exe bytes not set.")
 	}
 	if len(*b.zipBytes) <= 0 {
-		return errors.New("Zip bytes not set.")
+		return fmt.Errorf("Zip bytes not set.")
 	}
 	// Get sizes.
 	exeSize := int64(len(*b.exeBytes))

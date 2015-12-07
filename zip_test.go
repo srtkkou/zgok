@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestZipAndUnzip(t *testing.T) {
+func TestZipUnzip(t *testing.T) {
 	zipper := NewZipper()
 	// Add file.
 	err := zipper.Add("testdata/foo")

@@ -37,7 +37,8 @@ type FileSystem interface {
 	Signature() Signature
 	SetSignature(signature Signature)
 	String() string
-	Open(name string) (http.File, error) // Implements [net/http.FileSystem.Open]
+	Open(name string) (http.File, error)     // Implements [net/http.FileSystem.Open]
+	FileServer(basePath string) http.Handler // Get a static file server.
 }
 
 // Zgok file system.
