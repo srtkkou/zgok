@@ -93,13 +93,14 @@ use it normally.
 
 The format of the zgok executable file looks like the following.
 
-|Header section |
-|Section 1      |
-|Section 2      |
-| ...           |
-|Section n      |
-|Zip data       |
-|Zgok signature |
+| Header section |
+| -------------- |
+| Section 1      |
+| Section 2      |
+| ...            |
+| Section n      |
+| Zip data       |
+| Zgok signature |
 
 Zgok will unzip the files in the zip data section and add the content of them
 in a map accessible by their path.
