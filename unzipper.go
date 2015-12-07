@@ -9,9 +9,9 @@ import (
 
 // Unzipper.
 type Unzipper struct {
-	isUnzipped bool
-	reader     *bytes.Reader
-	size       int64
+	isUnzipped bool          // Is the file already unzipped?
+	reader     *bytes.Reader // Byte reader.
+	size       int64         // Size of the zipped file.
 }
 
 // Create new unzipper.

@@ -16,12 +16,12 @@ type Builder interface {
 
 // Zgok builder
 type zgokBuilder struct {
-	exePath  string
-	zipPaths []string
-	outPath  string
-	exeBytes *[]byte
-	zipBytes *[]byte
-	sigBytes *[]byte
+	exePath  string   // Executable file's path.
+	zipPaths []string // Zip file path.
+	outPath  string   // Output file path.
+	exeBytes *[]byte  // Bytes of the executable file.
+	zipBytes *[]byte  // Bytes of the zip file.
+	sigBytes *[]byte  // Bytes of the signature.
 }
 
 // Initialize new zgok builder.

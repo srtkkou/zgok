@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	APP_BYTE_SIZE       = 8
-	SIGNATURE_BYTE_SIZE = 64
+	APP_BYTE_SIZE       = 8  // Byte size of the signature app field.
+	SIGNATURE_BYTE_SIZE = 64 // Byte size of the signature.
 )
 
 var (
@@ -30,12 +30,12 @@ type Signature interface {
 
 // signature
 type zgokSignature struct {
-	app     string
-	major   uint16
-	minor   uint16
-	rev     uint16
-	exeSize int64
-	zipSize int64
+	app     string // App name.
+	major   uint16 // Major version.
+	minor   uint16 // Minor version.
+	rev     uint16 // Revision.
+	exeSize int64  // Executable file size.
+	zipSize int64  // Zip file part size.
 }
 
 // Initialize signature.

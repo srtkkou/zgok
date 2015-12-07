@@ -10,10 +10,10 @@ import (
 )
 
 type Zipper struct {
-	isClosed bool
-	buffer   *bytes.Buffer
-	writer   *zip.Writer
-	basePath string
+	isClosed bool          // Is the zip file closed?
+	buffer   *bytes.Buffer // Buffer.
+	writer   *zip.Writer   // Zip writer.
+	basePath string        // Base path.
 }
 
 // Create new zipper.

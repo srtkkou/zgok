@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	APP   = "zgok"
-	MAJOR = 0
-	MINOR = 0
-	REV   = 1
+	APP   = "zgok" // Application name.
+	MAJOR = 0      // Major version.
+	MINOR = 0      // Minor version.
+	REV   = 1      // Revision.
 )
 
 // Get version string.
@@ -42,9 +42,9 @@ type FileSystem interface {
 
 // Zgok file system.
 type zgokFileSystem struct {
-	signature Signature
-	rootPath  string
-	fileMap   map[string]File
+	signature Signature       // Zgok signature.
+	rootPath  string          // Root path of the file system.
+	fileMap   map[string]File // Map of files.
 }
 
 // Create a new file system.
@@ -207,10 +207,10 @@ type File interface {
 
 // Zgok file.
 type zgokFile struct {
-	path     string
-	fileInfo os.FileInfo
-	content  []byte
-	reader   *bytes.Reader
+	path     string        // Path of the file.
+	fileInfo os.FileInfo   // File info.
+	content  []byte        // Content of the file.
+	reader   *bytes.Reader // File reader.
 }
 
 // Create a new zgok file.
@@ -287,10 +287,10 @@ func (zf *zgokFile) Stat() (os.FileInfo, error) {
 // Zgok file info.
 // Implements [os.FileInfo]
 type zgokFileInfo struct {
-	name    string
-	size    int64
-	mode    os.FileMode
-	modTime time.Time
+	name    string      // File name.
+	size    int64       // Size of the file.
+	mode    os.FileMode // File mode.
+	modTime time.Time   // Modified time of the file.
 }
 
 // Get name.
