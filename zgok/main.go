@@ -66,7 +66,7 @@ func usage() {
 	fmt.Println()
 	fmt.Println("commands:")
 	fmt.Println("  build     : Build zgok executable file.")
-	fmt.Println("  list      : List information in zgok executable file.")
+	fmt.Println("  show      : Show information in zgok executable file.")
 	fmt.Println()
 	fmt.Println("global flags:")
 	fmt.Println("  -h        : Print this help message.")
