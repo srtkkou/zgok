@@ -1,3 +1,26 @@
+/*
+Package zgok provides a simple library to create a single binary with asset files in Go (Golang).
+
+Example:
+
+	package main
+
+	import (
+		"net/http"
+		"github.com/srtkkou/zgok"
+		"os"
+	)
+
+	func main() {
+		zfs, err := zgok.RestoreFileSystem(os.Args[0])
+		if err != nil {
+			panic(err)
+		}
+		assetServer := zfs.FileServer("web/public")
+		http.Handle("/assets/", http.StripPrefix("/assets/", assetServer))
+		http.ListenAndServe(":8080", nil)
+	}
+*/
 package zgok
 
 import (
