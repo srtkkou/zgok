@@ -149,7 +149,7 @@ func (b *zgokBuilder) setSignatureBytes() error {
 // Create out file.
 func (b *zgokBuilder) createOutFile() error {
 	// Create out file.
-	file, err := os.Create(b.outPath)
+	file, err := os.OpenFile(b.outPath, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}

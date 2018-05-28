@@ -2,26 +2,59 @@ package zgok
 
 import (
 	"os"
-	"path/filepath"
+	"os/exec"
+	fpath "path/filepath"
+	"runtime"
 	"testing"
 )
 
+const (
+	REAL_EXE_SRC_PATH = "testdata/hello.go"
+	REAL_EXE_PATH     = "hello.out"
+	DUMMY_EXE_PATH    = "testdata/executable"
+)
+
+var (
+	exePath string = DUMMY_EXE_PATH
+)
+
 func TestMain(m *testing.M) {
+	setup()
 	code := m.Run()
 	defer os.Exit(code)
 	teardown()
 }
 
+func setup() {
+	// Erase unused *.out files.
+	paths, _ := fpath.Glob("*.out")
+	for _, path := range paths {
+		os.Remove(path)
+	}
+	// Compile testdata/hello.go
+	cmd := exec.Command("go", "build", "-o", REAL_EXE_PATH, REAL_EXE_SRC_PATH)
+	err := cmd.Run()
+	if err == nil {
+		exePath = REAL_EXE_PATH
+	}
+}
+
 func teardown() {
-	paths, _ := filepath.Glob("*.out")
+	// Erase unused *.out files.
+	paths, _ := fpath.Glob("*.out")
 	for _, path := range paths {
 		os.Remove(path)
 	}
 }
 
 func TestBuildRestore(t *testing.T) {
+	// Show comment on exePath.
+	if exePath == REAL_EXE_PATH {
+		t.Logf("Testing with golang built exec [%s].", exePath)
+	} else {
+		t.Logf("Testing with dummy exec [%s].", exePath)
+	}
 	// Build zgok file.
-	exePath := "testdata/executable"
 	outPath := "builder_test.out"
 	builder := NewZgokBuilder()
 	err := builder.SetExePath(exePath)
@@ -64,6 +97,29 @@ func TestBuildRestore(t *testing.T) {
 	for i, path := range zfs.Paths() {
 		if zipPaths[i] != path {
 			t.Errorf("Paths():expected [%v] got [%v].", zipPaths[i], path)
+		}
+	}
+	// Check if exe is not broken.
+	if exePath == REAL_EXE_PATH {
+		// Get parent path.
+		_, filename, _, _ := runtime.Caller(0)
+		parentPath, err := fpath.Abs(fpath.Join(filename, ".."))
+		// Get expected output.
+		exBytes, err := exec.Command(fpath.Join(parentPath, exePath)).Output()
+		if err != nil {
+			t.Errorf("Failed to run test executable:[%v]", err.Error())
+		}
+		expected := string(exBytes[:])
+		// Get output of the built executable file.
+		outBytes, err := exec.Command(fpath.Join(parentPath, outPath)).Output()
+		if err != nil {
+			t.Errorf("Failed to run built executable:[%v]", err.Error())
+		}
+		output := string(outBytes[:])
+		// Compare the results.
+		if expected != output {
+			t.Errorf("Different output for built executable:expected [%v] got [%v].",
+				expected, output)
 		}
 	}
 }
