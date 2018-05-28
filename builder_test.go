@@ -48,6 +48,12 @@ func teardown() {
 }
 
 func TestBuildRestore(t *testing.T) {
+	// Show comment on exePath.
+	if exePath == REAL_EXE_PATH {
+		t.Logf("Testing with golang built exec [%s].", exePath)
+	} else {
+		t.Logf("Testing with dummy exec [%s].", exePath)
+	}
 	// Build zgok file.
 	outPath := "builder_test.out"
 	builder := NewZgokBuilder()
