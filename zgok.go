@@ -109,7 +109,7 @@ func RestoreFileSystem(path string) (FileSystem, error) {
 
 // Add file to file system.
 func (zfs *zgokFileSystem) AddFile(file File) {
-	key := filepath.ToSlash(file.Path())
+	key := filepath.ToSlash(filepath.Join("", file.Path()))
 	zfs.fileMap[key] = file
 }
 

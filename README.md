@@ -9,6 +9,7 @@ into the binary executable file for [Go](http://golang.org/).
 
 * It can create a single binary file containing all static files. Easy to deploy!
 * No dependency. Available both on Windows and Linux.
+* In development mode, it can transparently fall back to the local filesystem.
 
 ## Installation
 
@@ -39,13 +40,12 @@ func main() {
 	var content []byte
 	path := "test.txt"
 	zfs, _ := zgok.RestoreFileSystem(os.Args[0])
-	if zfs != nil {
-		// For release.
-		content, _ = zfs.ReadFile(path)
-	} else {
-		// For development.
-		content, _ = ioutil.ReadFile(path)
+	if zfs == nil {
+		// Development mode. Fall back to the local filesystem.
+		zfs, _ = zgok.NewLocalFileSystem("./")
 	}
+
+	content, _ = zfs.ReadFile(path)
 	fmt.Println(string(content))
 }
 ```
@@ -68,7 +68,10 @@ import (
 func main() {
 	zfs, err := zgok.RestoreFileSystem(os.Args[0])
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+
+		// Fall back to the local filesystem.
+		zfs, _ = zgok.NewLocalFileSystem("./")
 	}
 	assetServer := zfs.FileServer("web/public")
 	http.Handle("/assets/", http.StripPrefix("/assets/", assetServer))
