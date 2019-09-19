@@ -5,7 +5,7 @@
 Zgokは静的ファイルを実行可能なバイナリに埋め込む
 ための[Go](http://golang.org/)製のツールです。
 
-English: README.md
+English: [README.md](https://github.com/srtkkou/zgok/blob/master/README.md)
 
 ## 特徴
 
