@@ -127,7 +127,7 @@ func (zfs *zgokFileSystem) GetFile(path string) (File, error) {
 func (zfs *zgokFileSystem) ReadFile(path string) ([]byte, error) {
 	file, err := zfs.GetFile(path)
 	if err != nil {
-		return []byte{}, nil
+		return []byte{}, err
 	}
 	return file.Bytes(), nil
 }
@@ -136,7 +136,7 @@ func (zfs *zgokFileSystem) ReadFile(path string) ([]byte, error) {
 func (zfs *zgokFileSystem) ReadFileString(path string) (string, error) {
 	bytes, err := zfs.ReadFile(path)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	str := string(bytes)
 	return str, nil
