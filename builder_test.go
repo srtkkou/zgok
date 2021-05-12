@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	REAL_EXE_SRC_PATH = "testdata/hello.go"
-	REAL_EXE_PATH     = "hello.out"
-	DUMMY_EXE_PATH    = "testdata/executable"
+	RealExeSrcPath = "testdata/hello.go"
+	RealExePath    = "hello.out"
+	DummyExePath   = "testdata/executable"
 )
 
 var (
-	exePath string = DUMMY_EXE_PATH
+	exePath string = DummyExePath
 )
 
 func TestMain(m *testing.M) {
@@ -32,10 +32,10 @@ func setup() {
 		os.Remove(path)
 	}
 	// Compile testdata/hello.go
-	cmd := exec.Command("go", "build", "-o", REAL_EXE_PATH, REAL_EXE_SRC_PATH)
+	cmd := exec.Command("go", "build", "-o", RealExePath, RealExeSrcPath)
 	err := cmd.Run()
 	if err == nil {
-		exePath = REAL_EXE_PATH
+		exePath = RealExePath
 	}
 }
 
@@ -49,7 +49,7 @@ func teardown() {
 
 func TestBuildRestore(t *testing.T) {
 	// Show comment on exePath.
-	if exePath == REAL_EXE_PATH {
+	if exePath == RealExePath {
 		t.Logf("Testing with golang built exec [%s].", exePath)
 	} else {
 		t.Logf("Testing with dummy exec [%s].", exePath)
@@ -100,14 +100,14 @@ func TestBuildRestore(t *testing.T) {
 		}
 	}
 	// Check if exe is not broken.
-	if exePath == REAL_EXE_PATH {
+	if exePath == RealExePath {
 		// Get parent path.
 		_, filename, _, _ := runtime.Caller(0)
-		parentPath, err := fpath.Abs(fpath.Join(filename, ".."))
+		parentPath, _ := fpath.Abs(fpath.Join(filename, ".."))
 		// Get expected output.
 		exBytes, err := exec.Command(fpath.Join(parentPath, exePath)).Output()
 		if err != nil {
-			t.Errorf("Failed to run test executable:[%v]", err.Error())
+			t.Errorf("failed to run test executable:[%v]", err.Error())
 		}
 		expected := string(exBytes[:])
 		// Get output of the built executable file.

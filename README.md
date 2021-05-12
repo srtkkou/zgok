@@ -3,7 +3,8 @@
 [![GoDoc](https://godoc.org/github.com/srtkkou/zgok?status.svg)](https://godoc.org/github.com/srtkkou/zgok) [![Build Status](https://travis-ci.org/srtkkou/zgok.svg?branch=master)](https://travis-ci.org/srtkkou/zgok)
 
 ***DEPRECATED for larger version than go 1.16!***
-**Please use language feature "go:embed".**
+
+***Please use language feature "go:embed".***
 
 Zgok is a simple utility to embed any static file
 into the binary executable file for [Go](http://golang.org/).

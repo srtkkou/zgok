@@ -3,7 +3,7 @@ package zgok
 import (
 	"archive/zip"
 	"bytes"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -30,7 +30,7 @@ func NewZipper() *Zipper {
 func (z *Zipper) Add(path string) error {
 	// Check if zip is closed or not.
 	if z.isClosed {
-		return errors.New("ZIP is already closed.")
+		return fmt.Errorf("zip already closed")
 	}
 	// Get file information.
 	fileInfo, err := os.Stat(path)
@@ -62,7 +62,7 @@ func (z *Zipper) Close() error {
 // Get bytes of zip.
 func (z *Zipper) Bytes() ([]byte, error) {
 	if !z.isClosed {
-		return []byte{}, errors.New("ZIP is not closed.")
+		return []byte{}, fmt.Errorf("zip not closed")
 	}
 	return z.buffer.Bytes(), nil
 }
@@ -105,8 +105,7 @@ func (z *Zipper) addDir(dirPath string) error {
 				return nil
 			}
 			// Add file to zip.
-			err = z.addFile(path)
-			if err != nil {
+			if err := z.addFile(path); err != nil {
 				return err
 			}
 			return nil

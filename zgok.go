@@ -25,7 +25,6 @@ package zgok
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -118,7 +117,7 @@ func (zfs *zgokFileSystem) GetFile(path string) (File, error) {
 	key := filepath.ToSlash(filepath.Join(zfs.rootPath, path))
 	file, exists := zfs.fileMap[key]
 	if !exists {
-		return nil, errors.New("File doesn't exist.")
+		return nil, fmt.Errorf("file doesn't exist")
 	}
 	return file, nil
 }
@@ -160,7 +159,7 @@ func (zfs *zgokFileSystem) Paths() []string {
 func (zfs *zgokFileSystem) SubFileSystem(rootPath string) (FileSystem, error) {
 	// Check root path.
 	if strings.Contains(rootPath, "..") {
-		return nil, errors.New("No double dots [..] are allowed in root path.")
+		return nil, fmt.Errorf(`no double dots(..) are allowed in root path`)
 	}
 	// Initialize sub file system.
 	newRootPath := filepath.ToSlash(filepath.Join(zfs.rootPath, rootPath))
@@ -293,7 +292,7 @@ func (zf *zgokFile) Read(p []byte) (int, error) {
 // Read directories.
 // Implements [net/http.File.Readdir]
 func (zf *zgokFile) Readdir(count int) ([]os.FileInfo, error) {
-	return nil, errors.New("Readdir is not allowed.")
+	return nil, fmt.Errorf(`not allowed to "Readdir()"`)
 }
 
 // Seek file.

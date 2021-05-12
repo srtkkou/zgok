@@ -3,7 +3,6 @@ package zgok
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
 )
 
@@ -49,7 +48,7 @@ func NewSignature() Signature {
 func RestoreSignature(data []byte) (Signature, error) {
 	// Check size.
 	if len(data) != SIGNATURE_BYTE_SIZE {
-		return nil, errors.New("Invalid signature size.")
+		return nil, fmt.Errorf("invalid signature size")
 	}
 	// Convert bytes to buffer.
 	buf := bytes.NewBuffer(data)
@@ -58,7 +57,7 @@ func RestoreSignature(data []byte) (Signature, error) {
 		byteOrder: binary.BigEndian,
 	}
 	// Restore app name.
-	var appBytes []byte = make([]byte, APP_BYTE_SIZE, APP_BYTE_SIZE)
+	appBytes := make([]byte, APP_BYTE_SIZE)
 	_, err := buf.Read(appBytes)
 	if err != nil {
 		return nil, err
@@ -68,7 +67,7 @@ func RestoreSignature(data []byte) (Signature, error) {
 		return nil, err
 	}
 	if app != APP {
-		return nil, errors.New("Invalid signature.")
+		return nil, fmt.Errorf("invalid signature")
 	}
 	s.app = app
 	// Restore major version.
@@ -99,7 +98,7 @@ func RestoreSignature(data []byte) (Signature, error) {
 		return nil, err
 	}
 	if exeSize <= 0 {
-		return nil, errors.New("Invalid signature.")
+		return nil, fmt.Errorf("invalid signature")
 	}
 	s.exeSize = exeSize
 	// Restore zip size.
@@ -109,7 +108,7 @@ func RestoreSignature(data []byte) (Signature, error) {
 		return nil, err
 	}
 	if zipSize <= 0 {
-		return nil, errors.New("Invalid signature.")
+		return nil, fmt.Errorf("invalid signature")
 	}
 	s.zipSize = zipSize
 	return s, nil
@@ -119,7 +118,7 @@ func RestoreSignature(data []byte) (Signature, error) {
 func restoreAppString(appBytes []byte) (string, error) {
 	// Check byte size.
 	if len(appBytes) != APP_BYTE_SIZE {
-		return "", errors.New("Invalid app byte size.")
+		return "", fmt.Errorf("invalid app byte size")
 	}
 	// Get string length.
 	appLen := bytes.IndexByte(appBytes, 0)
@@ -214,7 +213,7 @@ func (s *zgokSignature) Dump() ([]byte, error) {
 func (s *zgokSignature) appBytes() [APP_BYTE_SIZE]byte {
 	var result [APP_BYTE_SIZE]byte
 	appBytes := []byte(s.app)
-	for i, _ := range result {
+	for i := range result {
 		if i < len(appBytes) {
 			result[i] = appBytes[i]
 		}

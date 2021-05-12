@@ -39,20 +39,20 @@ func TestFileServer(t *testing.T) {
 		t.Errorf("ioutil.ReadAll():error=[%v]", err)
 	}
 	fooBody := string(content)
-	if "foo" != fooBody {
-		t.Errorf("Content:expected [foo] got [%v].", fooBody)
+	if fooBody != "foo" {
+		t.Errorf(`expected "foo" got "%v"`, fooBody)
 	}
 	// Get "dir/bar"
 	res, err = http.Get(ts.URL + "/dir/bar")
 	if err != nil {
-		t.Errorf("Get [/dir/bar] failed.")
+		t.Errorf(`http.Get() failed to get "/dir/bar"`)
 	}
 	content, err = ioutil.ReadAll(res.Body)
 	if err != nil {
-		t.Errorf("ioutil.ReadAll():error=[%v]", err)
+		t.Errorf(`ioutil.ReadAll() %s`, err.Error())
 	}
 	barBody := string(content)
-	if "bar" != barBody {
-		t.Errorf("Content:expected [bar] got [%v].", barBody)
+	if barBody != "bar" {
+		t.Errorf(`expected "bar" got "%v"`, barBody)
 	}
 }

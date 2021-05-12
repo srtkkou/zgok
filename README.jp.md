@@ -3,7 +3,8 @@
 [![GoDoc](https://godoc.org/github.com/srtkkou/zgok?status.svg)](https://godoc.org/github.com/srtkkou/zgok) [![Build Status](https://travis-ci.org/srtkkou/zgok.svg?branch=master)](https://travis-ci.org/srtkkou/zgok)
 
 ***非推奨: go 1.16より上のバージョンでは非推奨です。***
-**言語に追加された静的ファイル埋め込みの仕組み「go:embed」を使ってください。**
+
+***言語に追加された静的ファイル埋め込みの仕組み「go:embed」を使ってください。***
 
 Zgokは静的ファイルを実行可能なバイナリに埋め込む
 ための[Go](http://golang.org/)製のツールです。

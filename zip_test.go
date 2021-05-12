@@ -17,7 +17,7 @@ func TestZipUnzip(t *testing.T) {
 		t.Errorf("Failed to add directory: %v", err)
 	}
 	// Add empty directory.
-	err = zipper.Add("testdata/empty")
+	zipper.Add("testdata/empty")
 	zipper.Close()
 	bytes, err := zipper.Bytes()
 	if err != nil {

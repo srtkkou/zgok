@@ -3,7 +3,7 @@ package zgok
 import (
 	"archive/zip"
 	"bytes"
-	"errors"
+	"fmt"
 	"io"
 )
 
@@ -29,7 +29,7 @@ func (u *Unzipper) Unzip() (FileSystem, error) {
 	var err error
 	// Check if it is already unzipped.
 	if u.isUnzipped {
-		return nil, errors.New("Already unzipped.")
+		return nil, fmt.Errorf("already unzipped")
 	}
 	// Initialize zip reader.
 	zipReader, err := zip.NewReader(u.reader, u.size)
